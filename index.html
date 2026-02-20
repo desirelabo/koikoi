@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>こいこい役合わせ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container" id="game-container">
+        <!-- 決定オーバーレイ -->
+        <div class="decision-overlay" id="decision-overlay"></div>
+        
+        <!-- 役完成メッセージ（上部表示用） -->
+        <div class="role-completion-message" id="role-completion-message"></div>
+        
+        <!-- 役完成通知（画面中央表示） -->
+<div id="role-completion-notification" style="display: none;">
+    <div class="role-owner-celebration" id="celebration-owner"></div>
+    <div class="role-name-celebration" id="celebration-role-name"></div>
+    <div class="role-points-celebration" id="celebration-points"></div>
+    <div class="role-cards-celebration" id="celebration-cards"></div>
+    
+    <!-- こいこい・勝負ボタンを追加 -->
+    <div class="role-decision-buttons" id="role-decision-buttons" style="display: none;">
+        <button class="role-koikoi-btn" id="role-koikoi-btn">🎲こいこい</button>
+        <button class="role-win-btn" id="role-win-btn">👋勝負</button>
+    </div>
+</div>
+        
+        <!-- 役を見るボタン -->
+        <button id="roles-btn">📋役を見る</button>
+        
+        <!-- リセットボタン -->
+        <button id="reset-btn">🔄リセット</button>
+        
+        <!-- ヘッダー -->
+        <header>🎴こいこい役合わせ</header>
+        
+        <!-- メッセージセクション -->
+        <div class="message-section" id="message-section">
+            <div id="message">🎯ゲームを開始します</div>
+        </div>
+        
+        <!-- 相手エリア -->
+        <div class="opponent-section">
+            <div class="opponent-hand" id="opponent-hand"></div>
+            <div class="opponent-paired" id="opponent-paired"></div>
+        </div>
+        
+        <!-- メインエリア -->
+        <div class="main-area">
+            <div class="deck" id="deck">24</div>
+            <div class="field-cards" id="field-cards"></div>
+        </div>
+        
+        <!-- 手札コンテナ -->
+        <div class="hand-container">
+            <div class="player-hand" id="player-hand"></div>
+            <div class="player-paired" id="player-paired"></div>
+        </div>
+        
+        <!-- 下部コントロール（4つのボタンを横一列に配置） -->
+        <div class="bottom-controls">
+            <div class="score-button" id="player-score-btn">
+                <div>😯じぶん</div>
+                <div id="player-score">💰0Pt</div>
+            </div>
+            
+            <button class="control-button" id="koikoi-btn" disabled>
+                🎲こいこい
+            </button>
+            
+            <button class="control-button" id="win-btn" disabled>
+                👋勝負
+            </button>
+            
+            <div class="score-button" id="opponent-score-btn">
+                <div>🤖あいて</div>
+                <div id="opponent-score">💰0Pt</div>
+            </div>
+        </div>
+        
+        <!-- 札をすてるボタン（隠しボタン） -->
+        <button class="control-button discard" id="discard-btn" style="position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: none;">
+            🗑️札をすてる
+        </button>
+    </div>
+    
+    <!-- 役表示モーダル（射幸心を煽るデザインに変更） -->
+    <div id="role-modal-backdrop">
+        <div id="role-modal">
+            <div id="role-celebration">
+                <div id="role-sparkles">✨💎✨</div>
+                <div id="role-announcement">
+                    <div id="role-player-name">😯じぶん</div>
+                    <div id="role-success-text">が</div>
+                    <div id="role-name-display">三光</div>
+                    <div id="role-complete-text">完成！</div>
+                </div>
+                <div id="role-points-mega">
+                    <div id="points-label">獲得ポイント</div>
+                    <div id="points-value">💰5</div>
+                    <div id="points-unit">点</div>
+                </div>
+                <div id="role-cards-showcase">
+                    <div id="role-cards-title">完成した役札</div>
+                    <div id="role-cards-display"></div>
+                </div>
+            </div>
+            <button id="role-modal-close-btn">▶️続行する</button>
+        </div>
+    </div>
+    
+    <!-- 役一覧モーダル -->
+    <div id="roles-modal-backdrop">
+        <div id="roles-modal">
+            <button id="roles-modal-close-btn">❌閉じる</button>
+            <iframe id="roles-modal-iframe" src=""></iframe>
+        </div>
+    </div>
+    
+    <!-- ゲーム結果モーダル -->
+    <div id="game-result-modal-backdrop" style="display: none;">
+        <div id="game-result-modal">
+            <h3 id="game-result-title">🎉あなたの勝利！</h3>
+            <div id="game-result-stats">
+                😯あなた: <span id="final-player-score">💰0</span>点 vs 🤖相手: <span id="final-opponent-score">💰0</span>点
+            </div>
+            <div id="game-result-buttons">
+                <button id="next-game-btn">🔄次のゲーム</button>
+                <button id="end-game-btn">🚪ゲーム終了</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- お別れモーダル -->
+    <div id="goodbye-modal-backdrop" style="display: none;">
+        <div id="goodbye-modal">
+            <h3>👋ゲーム終了</h3>
+            <div id="goodbye-stats">
+                🏆最終スコア - 😯あなた: <span id="goodbye-player-score">💰0</span>点 vs 🤖相手: <span id="goodbye-opponent-score">💰0</span>点
+            </div>
+            <div id="goodbye-message">🎉お疲れさまでした！</div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
+
+
