@@ -149,8 +149,18 @@ transition: left 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.5s cubic-bezier(0.2,
 
 .card-watermark { display: none !important; }
 .card-month-number { position: absolute; top: 4px; left: 6px; font-size: 1.1rem; font-weight: 900; color: rgba(205, 168, 105, 0.9); z-index: 3; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-family: sans-serif; pointer-events: none; }
-.card-inner-art { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; z-index: 2; position: relative; pointer-events: none; }
-.emoji-main { font-size: clamp(2rem, 10vw, 3rem); line-height: 1; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); pointer-events: none; }
+/* カード内の絵文字を完全に中央に固定 */
+.card-inner-art { 
+  position: absolute; 
+  inset: 0; 
+  display: flex; flex-direction: column; align-items: center; justify-content: center; 
+  z-index: 2; pointer-events: none; 
+}
+.emoji-main { 
+  font-size: clamp(2rem, 10vw, 3rem); line-height: 1; 
+  text-align: center; 
+  filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); pointer-events: none; 
+}
 
 .card.akatan { background: linear-gradient(135deg, #4a0d0d 0%, #2b0000 100%); border-color: #ff4d4d; }
 .card.aotan { background: linear-gradient(135deg, #0d1b4a 0%, #00092b 100%); border-color: #4d4dff; }
@@ -324,7 +334,7 @@ animation: gold-fall linear infinite;
     <div id="deck"><div class="deck-rect-visual"></div><span id="deck-count">24</span></div>
     <div class="field-cards" id="field-cards-container">
       
-      <!-- TOP UI AREA 刷新 -->
+      <!-- TOP UI AREA -->
       <div id="top-ui-area">
         <div class="top-background-effect"></div> 
         <div class="top-content-wrapper">
@@ -517,11 +527,11 @@ class StatusSyncManager {
       <h3 style="color:#cda869; border-bottom:1px solid #cda869; margin-top:20px;">🏆 主要な役と絵札</h3>
       <div style="margin-bottom:15px; background:rgba(255,255,255,0.05); padding:10px; border-radius:4px; border:1px solid rgba(205,168,105,0.2);">
       <p style="font-weight:bold; margin-bottom:5px;">● 五光 (20文)</p>
-      <div style="display:flex; gap:5px; margin-bottom:10px;">${['m01-h', 'm03-h', 'm08-h', 'm11-h', 'm12-h'].map(id=>this.createSampleCard(id)).join('')}</div>
+      <div style="display:flex; gap:5px; margin-bottom:10px; flex-wrap:wrap;">${['m01-h', 'm03-h', 'm08-h', 'm11-h', 'm12-h'].map(id=>this.createSampleCard(id)).join('')}</div>
       <p style="font-weight:bold; margin-bottom:5px;">● 猪鹿蝶 (10文)</p>
-      <div style="display:flex; gap:5px; margin-bottom:10px;">${['m07-n', 'm10-n', 'm06-n'].map(id=>this.createSampleCard(id)).join('')}</div>
+      <div style="display:flex; gap:5px; margin-bottom:10px; flex-wrap:wrap;">${['m07-n', 'm10-n', 'm06-n'].map(id=>this.createSampleCard(id)).join('')}</div>
       <p style="font-weight:bold; margin-bottom:5px;">● 赤短・青短 (各7文)</p>
-      <div style="display:flex; gap:10px;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
       <div style="display:flex; gap:3px;">${['m01-t', 'm02-t', 'm03-t'].map(id=>this.createSampleCard(id)).join('')}</div>
       <div style="display:flex; gap:3px;">${['m06-t', 'm09-t', 'm10-t'].map(id=>this.createSampleCard(id)).join('')}</div>
       </div>
@@ -689,32 +699,71 @@ class GameController {
     this.start();
   }
 
-  async deal() {
-    this.updateDeck(); let delayIndex = 0;
-    for (let i = 0; i < 4; i++) { const data = this.deck.pop(); this.field.push({ ...data, element: this.createCardUI(data) }); }
+   async deal() {
+    this.updateDeck();
+    
+    // 山札の現在位置を取得（ここからカードが飛んでいくようにする）
+    const deckRect = this.ui.deck.getBoundingClientRect(); 
+    const cRect = this.ui.game.getBoundingClientRect();
+    const startX = deckRect.left - cRect.left + deckRect.width / 2;
+    const startY = deckRect.top - cRect.top + deckRect.height / 2;
+
+    // カード生成時に「アニメーションなし」で一旦山札の位置に隠す処理
+    const setupInitialPosition = (el) => {
+      el.style.transition = 'none';
+      el.style.left = `${startX}px`;
+      el.style.top = `${startY}px`;
+      el.style.transform = `translate(-50%, -50%) scale(0.5)`;
+      void el.offsetHeight; // ブラウザに初期位置を強制認識させるおまじない
+      el.style.transition = ''; // アニメーション設定を元に戻す
+    };
+
+    // 1. まず「場」に4枚を少しずつ配る
+    for (let i = 0; i < 4; i++) { 
+      const data = this.deck.pop(); 
+      const el = this.createCardUI(data);
+      setupInitialPosition(el);
+      this.field.push({ ...data, element: el }); 
+      this.renderCards();
+      this.updateDeck();
+      await this.sleep(150); // 1枚配るごとのタメ
+    }
+
+    // 2. プレイヤーとあいてに「交互に6枚ずつ」配る
     for (let i = 0; i < 6; i++) {
-      const data = this.deck.pop(); const obj = { ...data, element: this.createCardUI(data) };
-      obj.element.onclick = (e) => {
+      // プレイヤーの手札
+      const pData = this.deck.pop(); 
+      const pObj = { ...pData, element: this.createCardUI(pData) };
+      setupInitialPosition(pObj.element);
+      pObj.element.onclick = (e) => {
         e.stopPropagation();
         if (this.state !== 'PLAYER_TURN' || document.body.classList.contains('turn-opponent') || this.isProcessing) return;
-        if (!this.playerHand.includes(obj)) return;
+        if (!this.playerHand.includes(pObj)) return;
 
-        if (this.focusedCard === obj) {
-          this.executeAction('Player Hand', async () => { this.clearFocus(); await this.handleHandAction(obj, true); });
+        if (this.focusedCard === pObj) {
+          this.executeAction('Player Hand', async () => { this.clearFocus(); await this.handleHandAction(pObj, true); });
         } else {
-          this.clearFocus(); this.focusedCard = obj; obj.element.classList.add('focused'); this.highlightMatches(obj);
+          this.clearFocus(); this.focusedCard = pObj; pObj.element.classList.add('focused'); this.highlightMatches(pObj);
         }
       };
-      this.playerHand.push(obj);
-    }
-    for (let i = 0; i < 6; i++) {
-      const data = this.deck.pop();
-      const el = this.createCardUI(data); el.classList.add('role-opponent');
-      this.opponentHand.push({ ...data, element: el });
-    }
-    this.renderCards(); this.updateDeck(); await this.sleep(800);
-  }
+      this.playerHand.push(pObj);
+      this.renderCards();
+      this.updateDeck();
+      await this.sleep(100); // 少し早めのテンポで配る
 
+      // あいての手札
+      const oData = this.deck.pop();
+      const oEl = this.createCardUI(oData); 
+      oEl.classList.add('role-opponent');
+      setupInitialPosition(oEl);
+      this.opponentHand.push({ ...oData, element: oEl });
+      this.renderCards();
+      this.updateDeck();
+      await this.sleep(100);
+    }
+    
+    await this.sleep(500); // 全て配り終えてゲームが始まる直前の余韻
+  }
   createCardUI(data) {
     const div = document.createElement('div');
     const tagClasses = data.tags ? data.tags.join(' ') : '';
@@ -742,7 +791,10 @@ class GameController {
     const target = document.getElementById(targetId); if (!target) return;
     const rect = target.getBoundingClientRect(); const cRect = this.ui.game.getBoundingClientRect();
     const width = rect.width; 
-    const spacing = role !== 'field' ? Math.min(50, width / (cards.length + 1)) : 80;
+    
+    // 場札(field)の場合も、幅に合わせて間隔を自動縮小（最大80px、右の山札スペース約100pxを確保）
+    const spacing = role !== 'field' ? Math.min(50, width / (cards.length + 1)) : Math.min(80, (width - 100) / Math.max(1, cards.length - 1));
+    
     const startX = rect.left - cRect.left + (width - (spacing * (cards.length - 1))) / 2;
     const baseY = rect.top - cRect.top;
 
@@ -780,19 +832,31 @@ class GameController {
     const rect = target.getBoundingClientRect(); const cRect = this.ui.game.getBoundingClientRect();
     const baseY = rect.top - cRect.top; const baseX = rect.left - cRect.left;
 
-    const typeOrder = { 'hikari': 1, 'tane': 2, 'tanzaku': 3 };
-    const sortedCards = [...cards].sort((a, b) => (typeOrder[a.type] || 99) - (typeOrder[b.type] || 99));
+    // 札の種類ごとにグループ分けして整理する
+    const groups = { 'hikari': [], 'tane': [], 'tanzaku': [], 'other': [] };
+    cards.forEach(card => {
+      if (groups[card.type]) groups[card.type].push(card);
+      else groups['other'].push(card);
+    });
 
-    sortedCards.forEach((card, i) => {
-      const el = card.element;
-      if (el.classList.contains('capture-flash')) return;
+    // 種類ごとの縦の配置（段）を設定
+    const yOffsets = { 'hikari': 0, 'tane': 30, 'tanzaku': 60, 'other': 90 };
 
-      const xOffset = (i % 6) * 25;
-      const yOffset = Math.floor(i / 6) * 30;
+    // グループごとに描画
+    Object.keys(groups).forEach(type => {
+      groups[type].forEach((card, index) => {
+        const el = card.element;
+        if (el.classList.contains('capture-flash')) return;
 
-      el.style.left = `${baseX + 25 + xOffset}px`;
-      el.style.top = `${baseY + 20 + yOffset}px`;
-      el.style.zIndex = i; el.style.transform = `translateX(-50%) scale(0.7)`;
+        // 同じ種類の中で横に少しずつズラす
+        const xOffset = index * 25;
+        const yOffset = yOffsets[type];
+
+        el.style.left = `${baseX + 30 + xOffset}px`;
+        el.style.top = `${baseY + 15 + yOffset}px`;
+        el.style.zIndex = index + (type === 'hikari' ? 100 : type === 'tane' ? 50 : 0); 
+        el.style.transform = `translateX(-50%) scale(0.7)`;
+      });
     });
   }
 
@@ -814,11 +878,11 @@ class GameController {
   async aiThinkAndAct() {
     await this.sleep(1200);
     let card = this.opponentHand.find(h => this.field.some(f => f.month === h.month));
-    if (!card && this.opponentHand.length > 0) card = this.opponentHand;
+    if (!card && this.opponentHand.length > 0) card = this.opponentHand;``
     
     if (card) {
       card.element.classList.remove('role-opponent');
-      card.element.classList.add('telegraph-glow');
+      // 光る演出（telegraph-glow）を削除
       
       const match = this.field.find(f => f.month === card.month);
       if (match) {
@@ -829,7 +893,6 @@ class GameController {
         await this.sleep(800);
       }
       
-      card.element.classList.remove('telegraph-glow');
       await this.handleHandAction(card, false);
     }
   }
@@ -870,6 +933,7 @@ class GameController {
 
       if (isPlayer) this.ui.log.innerText = "✨ 札を獲得しました";
       
+      // テンポを劇的に改善：1.5秒から「0.75秒」へ短縮
       await this.sleep(750);
 
       [card.element, match.element].forEach(el => el.classList.remove('capture-flash'));
