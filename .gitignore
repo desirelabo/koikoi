@@ -4,3 +4,4 @@ package-lock.json
 .git/
 .vscode/
 plans/
+koikoi/node_modules/
