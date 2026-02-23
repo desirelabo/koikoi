@@ -1,0 +1,104 @@
+/* 季節テーマ：春 */
+body.season-1 {
+  --c-page-bg: #fdf5f8;
+  --c-surface: #ffffff;
+  --c-surface-muted: #fff7fb;
+  --c-border-soft: #f5c6da;
+  --c-border-strong: #f093c3;
+  --c-text-main: #4a2c4f;
+  --c-text-subtle: #6d3f6e;
+
+  --c-base: #e573b4;
+  --c-base-soft: #ffe3f2;
+  --c-bonus: #ffd54f;
+  --c-bonus-soft: #fff3cd;
+  --c-hazard: #e53935;
+  --c-hazard-soft: #ffebee;
+
+  --c-glow-blue-inner: #ffe3f2;
+  --c-glow-blue-outer: #e573b4;
+}
+
+/* 季節テーマ：夏 */
+body.season-2 {
+  --c-page-bg: #e3f7ff;
+  --c-surface: #ffffff;
+  --c-surface-muted: #e8f9ff;
+  --c-border-soft: #b3e5fc;
+  --c-border-strong: #4fc3f7;
+  --c-text-main: #014f86;
+  --c-text-subtle: #0369a1;
+
+  --c-base: #00bcd4;
+  --c-base-soft: #e0f7fa;
+  --c-bonus: #ffeb3b;
+  --c-bonus-soft: #fffde7;
+  --c-hazard: #f44336;
+  --c-hazard-soft: #ffdde0;
+
+  --c-glow-blue-inner: #e0f7fa;
+  --c-glow-blue-outer: #00bcd4;
+}
+
+/* 季節テーマ：秋 */
+body.season-3 {
+  --c-page-bg: #fff7e6;
+  --c-surface: #fffaf0;
+  --c-surface-muted: #fff3e0;
+  --c-border-soft: #ffe0b2;
+  --c-border-strong: #ffb74d;
+  --c-text-main: #5d4037;
+  --c-text-subtle: #6d4c41;
+
+  --c-base: #ff9800;
+  --c-base-soft: #fff3e0;
+  --c-bonus: #ffca28;
+  --c-bonus-soft: #fff8e1;
+  --c-hazard: #d84315;
+  --c-hazard-soft: #ffccbc;
+
+  --c-glow-blue-inner: #fff3e0;
+  --c-glow-blue-outer: #ff9800;
+}
+
+/* 季節テーマ：冬 */
+body.season-4 {
+  --c-page-bg: #e8ecff;
+  --c-surface: #f9fbff;
+  --c-surface-muted: #eef2ff;
+  --c-border-soft: #c5cae9;
+  --c-border-strong: #3f51b5;
+  --c-text-main: #1a237e;
+  --c-text-subtle: #283593;
+
+  --c-base: #3f51b5;
+  --c-base-soft: #e8eaf6;
+  --c-bonus: #ffeb3b;
+  --c-bonus-soft: #fffde7;
+  --c-hazard: #ef5350;
+  --c-hazard-soft: #ffcdd2;
+
+  --c-glow-blue-inner: #e8eaf6;
+  --c-glow-blue-outer: #3f51b5;
+}
+
+/* 季節テーマ：朧（プリズム） */
+body.season-5 {
+  --c-page-bg: radial-gradient(circle at 0 0, #fdfbff, #e3f2fd 40%, #111827 100%);
+  --c-surface: rgba(17, 24, 39, 0.9);
+  --c-surface-muted: rgba(15, 23, 42, 0.9);
+  --c-border-soft: rgba(148, 163, 184, 0.6);
+  --c-border-strong: rgba(248, 250, 252, 0.9);
+  --c-text-main: #e5e7eb;
+  --c-text-subtle: #cbd5f5;
+
+  --c-base: #a855f7;
+  --c-base-soft: rgba(216, 180, 254, 0.35);
+  --c-bonus: #facc15;
+  --c-bonus-soft: rgba(250, 204, 21, 0.25);
+  --c-hazard: #fb7185;
+  --c-hazard-soft: rgba(248, 113, 113, 0.25);
+
+  --c-glow-blue-inner: rgba(191, 219, 254, 0.35);
+  --c-glow-blue-outer: #a855f7;
+}

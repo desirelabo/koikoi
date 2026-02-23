@@ -1,0 +1,163 @@
+body {
+  background-color: var(--c-page-bg, #ecf0f1);
+  margin: 0;
+  padding: 8px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+:root {
+  /* ベーストーン（ニュートラル） */
+  --c-page-bg: #ecf0f1;
+  --c-surface: #ffffff;
+  --c-surface-muted: #f8f9fa;
+  --c-border-soft: #dee2e6;
+  --c-border-strong: #bdc3c7;
+  --c-text-main: #2c3e50;
+  --c-text-subtle: #34495e;
+
+  /* アクセント（季節で変化させる） */
+  --c-base: #3498db;   /* メインアクセント */
+  --c-bonus: #f1c40f;  /* ボーナス／ハイライト（金） */
+  --c-hazard: #e74c3c; /* 警告・ハザード（赤） */
+
+  /* 補助アクセント */
+  --c-base-soft: #e3f2fd;
+  --c-bonus-soft: #fff3e0;
+  --c-hazard-soft: #ffebee;
+
+  /* 役・カードカテゴリ色（ニュートラルベース） */
+  --c-card-light-bg: #c8e6c9;
+  --c-card-light-fg: #1b5e20;
+  --c-card-ribbon-bg: #ffcdd2;
+  --c-card-ribbon-fg: #c62828;
+  --c-card-seed-bg: #fff3e0;
+  --c-card-seed-fg: #ef6c00;
+  --c-card-chaff-bg: #f5f5f5;
+  --c-card-chaff-fg: #424242;
+
+  /* Zanshin / グロー用 */
+  --c-glow-blue-inner: #e3f2fd;
+  --c-glow-blue-outer: #2196f3;
+  --c-glow-orange-inner: #fff3e0;
+  --c-glow-orange-outer: #ff9800;
+  --c-glow-red-inner: #ffebee;
+  --c-glow-red-outer: #f44336;
+  --c-glow-green-inner: #d1f2eb;
+  --c-glow-green-outer: #1abc9c;
+  --c-glow-hazard-inner: #fadbd8;
+  --c-glow-hazard-outer: #e74c3c;
+
+  --animation-duration: 2.0s;
+}
+
+.container {
+  position: relative;
+  width: 600px;
+  height: 600px;
+  background-color: var(--c-surface);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px 45px 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+  border: 2px solid var(--c-border-strong);
+}
+
+.decision-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 10% 0, rgba(255, 255, 255, 0.1), transparent 55%),
+              radial-gradient(circle at 90% 100%, rgba(255, 255, 255, 0.08), transparent 55%),
+              rgba(5, 10, 25, 0.78);
+  border-radius: 12px;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.decision-overlay.active {
+  opacity: 1;
+}
+
+header {
+  font-weight: 700;
+  font-size: 1.2em;
+  text-align: center;
+  user-select: none;
+  color: var(--c-text-main);
+  margin-bottom: 8px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: var(--c-surface-muted);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--c-border-soft);
+}
+
+.message-section {
+  min-height: 28px;
+  max-height: 32px;
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: var(--c-surface);
+  margin: 4px 0 6px 0;
+  padding: 4px 12px;
+  font-weight: 600;
+  color: var(--c-text-main);
+  font-size: 0.8rem;
+  line-height: 1.2em;
+  white-space: nowrap;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 10;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', 'Android Emoji', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.message-section.player-turn {
+  animation: message-outer-glow-sync var(--animation-duration) ease-in-out infinite;
+}
+
+@keyframes message-outer-glow-sync {
+  0% {
+    box-shadow: 0 0 0 2px var(--c-glow-blue-inner);
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--c-glow-blue-outer);
+  }
+  100% {
+    box-shadow: 0 0 0 2px var(--c-glow-blue-inner);
+  }
+}
+
+.role-completion-message {
+  position: absolute;
+  top: 45px;
+  left: 20px;
+  right: 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--c-hazard);
+  background: linear-gradient(135deg, #fff5f5, #ffeaa7);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid var(--c-hazard);
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+  z-index: 180;
+  display: none;
+}
